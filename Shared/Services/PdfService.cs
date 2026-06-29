@@ -80,7 +80,13 @@ public sealed class PdfService : IPdfService
         if (devis.RemiseGlobale > 0)
             docLines.Add(new("Remise globale", $"{devis.RemiseGlobale:N2} %"));
 
-        var model = BaseModel(cfg, "DEVIS", docLines, PartyLines(party, "Client"), cols, rows, totals, devis.Note, vis.ShowMontantTtc);
+        var conditionLines = devis.Conditions
+            .OrderBy(c => c.Ordre)
+            .Where(c => !string.IsNullOrWhiteSpace(c.Titre) || !string.IsNullOrWhiteSpace(c.Valeur))
+            .Select(c => new PdfKeyValueLine(c.Titre, c.Valeur))
+            .ToList();
+
+        var model = BaseModel(cfg, "DEVIS", docLines, PartyLines(party, "Client"), cols, rows, totals, devis.Note, vis.ShowMontantTtc, conditionLines);
         return CommercialDocumentPdfRenderer.Render(model, TryLoadLogoBytes(cfg.SocieteLogoPath));
     }
 
@@ -501,7 +507,8 @@ public sealed class PdfService : IPdfService
         List<IReadOnlyList<string>> rows,
         (decimal ht, decimal tva, decimal ttc) totals,
         string? note,
-        bool showTaxAndTtcInTotalsBox = true)
+        bool showTaxAndTtcInTotalsBox = true,
+        IReadOnlyList<PdfKeyValueLine>? conditionLines = null)
     {
         var qtyCol = FindQtyColumnIndex(columns);
         var refCol = FindRefColumnIndex(columns);
@@ -568,6 +575,7 @@ public sealed class PdfService : IPdfService
             Devise = cfg.Devise,
             AmountInWords = amountWords,
             Note = note,
+            ConditionLines = conditionLines ?? Array.Empty<PdfKeyValueLine>(),
             FooterLines = BuildFooterLines(cfg),
             ShowTaxAndTtcInTotalsBox = showTaxAndTtcInTotalsBox
         };

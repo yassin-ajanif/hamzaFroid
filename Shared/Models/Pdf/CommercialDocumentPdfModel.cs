@@ -18,5 +18,6 @@ public sealed class CommercialDocumentPdfModel
     public string Devise { get; init; } = "MAD";
     public string? AmountInWords { get; init; }
     public string? Note { get; init; }
+    public IReadOnlyList<PdfKeyValueLine> ConditionLines { get; init; } = Array.Empty<PdfKeyValueLine>();
     public IReadOnlyList<string> FooterLines { get; init; } = Array.Empty<string>();
 }

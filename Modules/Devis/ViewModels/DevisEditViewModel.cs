@@ -99,6 +99,10 @@ public partial class DevisEditViewModel : BaseViewModel
     [ObservableProperty] private string _lblDocColTva = string.Empty;
     [ObservableProperty] private string _lblDocColMontantHt = string.Empty;
     [ObservableProperty] private string _lblDocColMontantTtc = string.Empty;
+    [ObservableProperty] private string _lblConditions = string.Empty;
+    [ObservableProperty] private string _btnAddCondition = string.Empty;
+    [ObservableProperty] private string _wmConditionTitle = string.Empty;
+    [ObservableProperty] private string _wmConditionValue = string.Empty;
 
     public DocumentLineGridColumnState LineGridColumns { get; } = new();
 
@@ -135,11 +139,16 @@ public partial class DevisEditViewModel : BaseViewModel
         LblDocColTva = _locale.T("DocLine_ColTva");
         LblDocColMontantHt = _locale.T("DocLine_ColMontantHt");
         LblDocColMontantTtc = _locale.T("DocLine_ColMontantTtc");
+        LblConditions = _locale.T("Devis_LblConditions");
+        BtnAddCondition = _locale.T("Devis_BtnAddCondition");
+        WmConditionTitle = _locale.T("Devis_WmConditionTitle");
+        WmConditionValue = _locale.T("Devis_WmConditionValue");
     }
 
     public ObservableCollection<GestionCommerciale.Modules.Tiers.Models.Tiers> Clients { get; } = [];
     public ObservableCollection<GestionCommerciale.Modules.Stock.Models.Produit> Produits { get; } = [];
     public ObservableCollection<DevisLineRow> Lignes { get; } = [];
+    public ObservableCollection<DevisConditionRow> Conditions { get; } = [];
 
     [ObservableProperty] private int? _devisId;
     [ObservableProperty] private int _clientId;
@@ -355,6 +364,7 @@ public partial class DevisEditViewModel : BaseViewModel
         Devise = CurrencyHelper.FromSettings(cfg);
 
         Lignes.Clear();
+        Conditions.Clear();
         SelectedLine = null;
         ResetAddProductSearch();
         await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
@@ -378,11 +388,12 @@ public partial class DevisEditViewModel : BaseViewModel
             IsReadOnly = false;
             IsExpire = false;
             Title = _locale.T("Devis_NewTitle");
+            SeedDefaultConditions();
             RefreshTotals();
             return;
         }
 
-        var d = await db.Devis.Include(x => x.Lignes).FirstAsync(x => x.Id == id, cancellationToken);
+        var d = await db.Devis.Include(x => x.Lignes).Include(x => x.Conditions).FirstAsync(x => x.Id == id, cancellationToken);
         Numero = d.Numero;
         ClientId = d.ClientId;
         Date = new DateTimeOffset(d.Date);
@@ -408,6 +419,15 @@ public partial class DevisEditViewModel : BaseViewModel
             Lignes.Add(row);
         }
 
+        foreach (var c in d.Conditions.OrderBy(x => x.Ordre))
+        {
+            Conditions.Add(new DevisConditionRow
+            {
+                Titre = c.Titre,
+                Valeur = c.Valeur
+            });
+        }
+
         IsExpire = DateValidite.DateTime.Date < DateTime.Today;
         IsReadOnly = false;
         Title = _locale.Tf("Devis_TitleNum", Numero);
@@ -424,6 +444,52 @@ public partial class DevisEditViewModel : BaseViewModel
         AddLineSearchText = string.Empty;
         _suppressAddLinePick = false;
     }
+
+    [RelayCommand]
+    private void AddCondition()
+    {
+        if (IsReadOnly) return;
+        Conditions.Add(new DevisConditionRow());
+    }
+
+    [RelayCommand]
+    private void RemoveCondition(DevisConditionRow? row)
+    {
+        if (IsReadOnly || row == null) return;
+        Conditions.Remove(row);
+    }
+
+    private void SeedDefaultConditions()
+    {
+        Conditions.Add(new DevisConditionRow
+        {
+            Titre = "NON COMPRIS",
+            Valeur = "Tous ce qui n'apparaît pas dans le présent devis"
+        });
+        Conditions.Add(new DevisConditionRow
+        {
+            Titre = "DUREE DES TRAVAUX",
+            Valeur = "10 jours"
+        });
+        Conditions.Add(new DevisConditionRow
+        {
+            Titre = "VALIDITE DE DEVIS",
+            Valeur = "1 mois"
+        });
+        Conditions.Add(new DevisConditionRow
+        {
+            Titre = "PAIEMENT",
+            Valeur = "50% à la commande par chèque. 50% au cour des travaux"
+        });
+    }
+
+    private static IEnumerable<DevisCondition> BuildConditionEntities(IEnumerable<DevisConditionRow> rows) =>
+        rows.Select((row, index) => new DevisCondition
+        {
+            Titre = row.Titre.Trim(),
+            Valeur = row.Valeur.Trim(),
+            Ordre = index
+        }).Where(c => !string.IsNullOrWhiteSpace(c.Titre) || !string.IsNullOrWhiteSpace(c.Valeur));
 
     [RelayCommand]
     private void RemoveLine(DevisLineRow? row)
@@ -495,19 +561,23 @@ public partial class DevisEditViewModel : BaseViewModel
                     });
                 }
 
+                foreach (var c in BuildConditionEntities(Conditions))
+                    entity.Conditions.Add(c);
+
                 db.Devis.Add(entity);
                 await db.SaveChangesAsync(cancellationToken);
                 DevisId = entity.Id;
             }
             else
             {
-                entity = await db.Devis.Include(d => d.Lignes).FirstAsync(d => d.Id == DevisId, cancellationToken);
+                entity = await db.Devis.Include(d => d.Lignes).Include(d => d.Conditions).FirstAsync(d => d.Id == DevisId, cancellationToken);
                 entity.ClientId = ClientId;
                 entity.Date = Date.DateTime;
                 entity.DateValidite = DateValidite.DateTime;
                 entity.RemiseGlobale = RemiseGlobale;
                 entity.Note = Note;
                 db.DevisLignes.RemoveRange(entity.Lignes);
+                db.DevisConditions.RemoveRange(entity.Conditions);
                 foreach (var l in Lignes)
                 {
                     entity.Lignes.Add(new DevisLigne
@@ -521,6 +591,9 @@ public partial class DevisEditViewModel : BaseViewModel
                         TauxTVA = l.TauxTva
                     });
                 }
+
+                foreach (var c in BuildConditionEntities(Conditions))
+                    entity.Conditions.Add(c);
 
                 await db.SaveChangesAsync(cancellationToken);
             }
@@ -608,7 +681,7 @@ public partial class DevisEditViewModel : BaseViewModel
     {
         if (DevisId is not { } id) return null;
         await using var db = await _dbFactory.CreateDbContextAsync(cancellationToken);
-        var d = await db.Devis.Include(x => x.Lignes).FirstAsync(x => x.Id == id, cancellationToken);
+        var d = await db.Devis.Include(x => x.Lignes).Include(x => x.Conditions).FirstAsync(x => x.Id == id, cancellationToken);
         var client = await db.Tiers.AsNoTracking().FirstAsync(t => t.Id == d.ClientId, cancellationToken);
         return await _pdf.BuildDevisPdfAsync(d, DocumentPartyPdfInfo.FromTiers(client), cancellationToken);
     }

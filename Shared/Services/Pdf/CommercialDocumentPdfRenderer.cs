@@ -88,6 +88,12 @@ public static class CommercialDocumentPdfRenderer
                     });
 
                     main.Item().ExtendVertical().Element(c => DrawTable(c, model));
+
+                    if (!string.IsNullOrWhiteSpace(model.Note))
+                        main.Item().Element(c => DrawNoteSection(c, model.Note!));
+
+                    if (model.ConditionLines.Count > 0)
+                        main.Item().Element(c => DrawConditionsSection(c, model.ConditionLines));
                 });
 
                 page.Footer().AlignCenter().Column(fc =>
@@ -113,6 +119,34 @@ public static class CommercialDocumentPdfRenderer
         });
 
         return doc.GeneratePdf();
+    }
+
+    private static void DrawNoteSection(IContainer container, string note)
+    {
+        container.Element(InfoPanel).Padding(12).Column(col =>
+        {
+            col.Item().Text("Note").SemiBold().FontSize(9).FontColor(TextMuted);
+            col.Item().PaddingTop(4).Text(note).FontSize(9).FontColor(TextPrimary).LineHeight(1.35f);
+        });
+    }
+
+    private static void DrawConditionsSection(IContainer container, IReadOnlyList<PdfKeyValueLine> lines)
+    {
+        container.Element(InfoPanel).Padding(12).Column(col =>
+        {
+            col.Spacing(8);
+            col.Item().Text("CONDITIONS").Bold().FontSize(10).FontColor(TextPrimary);
+            foreach (var line in lines)
+            {
+                col.Item().PaddingTop(4).Column(block =>
+                {
+                    if (!string.IsNullOrWhiteSpace(line.Key))
+                        block.Item().Text(line.Key.ToUpperInvariant()).SemiBold().FontSize(9).FontColor(TextSecondary);
+                    if (!string.IsNullOrWhiteSpace(line.Value))
+                        block.Item().PaddingTop(2).Text(line.Value).FontSize(9).FontColor(TextPrimary).LineHeight(1.35f);
+                });
+            }
+        });
     }
 
     private static void DrawLogoOrCompanyName(

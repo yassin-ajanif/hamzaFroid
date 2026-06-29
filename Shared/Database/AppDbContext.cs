@@ -22,6 +22,7 @@ public class AppDbContext : DbContext
     public DbSet<MouvementStock> MouvementsStock => Set<MouvementStock>();
     public DbSet<Devis> Devis => Set<Devis>();
     public DbSet<DevisLigne> DevisLignes => Set<DevisLigne>();
+    public DbSet<DevisCondition> DevisConditions => Set<DevisCondition>();
     public DbSet<BonLivraison> BonsLivraison => Set<BonLivraison>();
     public DbSet<BonLivraisonLigne> BonLivraisonLignes => Set<BonLivraisonLigne>();
     public DbSet<BonCommande> BonsCommande => Set<BonCommande>();
@@ -65,6 +66,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Devis>(e =>
         {
             e.HasMany(d => d.Lignes).WithOne(l => l.Devis).HasForeignKey(l => l.DevisId).OnDelete(DeleteBehavior.Cascade);
+            e.HasMany(d => d.Conditions).WithOne(c => c.Devis).HasForeignKey(c => c.DevisId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<BonLivraison>(e =>
