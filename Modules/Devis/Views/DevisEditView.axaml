@@ -6,6 +6,34 @@
              xmlns:gc="using:GestionCommerciale.Shared.Controls"
              x:Class="GestionCommerciale.Modules.Devis.Views.DevisEditView"
              x:DataType="vm:DevisEditViewModel">
+  <UserControl.Styles>
+    <Style Selector="Button.condition-remove">
+      <Setter Property="Width" Value="32"/>
+      <Setter Property="Height" Value="32"/>
+      <Setter Property="MinWidth" Value="32"/>
+      <Setter Property="MinHeight" Value="32"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Background" Value="{DynamicResource CourseraDangerBrush}"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="6"/>
+      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+    <Style Selector="Button.condition-remove /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Button.condition-remove:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#B91C1C"/>
+    </Style>
+    <Style Selector="Button.condition-remove:disabled">
+      <Setter Property="Opacity" Value="0.45"/>
+    </Style>
+  </UserControl.Styles>
   <ScrollViewer>
     <StackPanel Spacing="10">
       <StackPanel Orientation="Horizontal" Spacing="8">
@@ -207,24 +235,23 @@
               <DataTemplate DataType="vm:DevisConditionRow">
                 <Border Margin="0,0,0,8" Background="White" BorderBrush="#D1D5DB" BorderThickness="1" CornerRadius="6" Padding="8">
                   <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
-                    <TextBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,6"
+                    <TextBox Grid.Row="0" Grid.Column="0" Margin="0,0,8,6"
                              Text="{Binding Titre, Mode=TwoWay}"
                              Watermark="{Binding $parent[UserControl].((vm:DevisEditViewModel)DataContext).WmConditionTitle}"
                              Background="#F3F4F6" FontWeight="SemiBold"
                              IsReadOnly="{Binding $parent[UserControl].((vm:DevisEditViewModel)DataContext).IsReadOnly}"/>
-                    <TextBox Grid.Row="1" Grid.Column="0" Margin="0,0,8,0"
+                    <Button Grid.Row="0" Grid.Column="1" Margin="0,0,0,6"
+                            Classes="condition-remove"
+                            Content="×"
+                            VerticalAlignment="Top"
+                            Command="{Binding $parent[UserControl].((vm:DevisEditViewModel)DataContext).RemoveConditionCommand}"
+                            CommandParameter="{Binding}"
+                            IsEnabled="{Binding !$parent[UserControl].((vm:DevisEditViewModel)DataContext).IsReadOnly}"/>
+                    <TextBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
                              Text="{Binding Valeur, Mode=TwoWay}"
                              Watermark="{Binding $parent[UserControl].((vm:DevisEditViewModel)DataContext).WmConditionValue}"
                              AcceptsReturn="True" MinHeight="44" TextWrapping="Wrap"
-                             VerticalAlignment="Center"
                              IsReadOnly="{Binding $parent[UserControl].((vm:DevisEditViewModel)DataContext).IsReadOnly}"/>
-                    <Button Grid.Row="1" Grid.Column="1"
-                            Content="✕" VerticalAlignment="Center" HorizontalAlignment="Right"
-                            MinWidth="36" MinHeight="36"
-                            Command="{Binding $parent[UserControl].((vm:DevisEditViewModel)DataContext).RemoveConditionCommand}"
-                            CommandParameter="{Binding}"
-                            IsEnabled="{Binding !$parent[UserControl].((vm:DevisEditViewModel)DataContext).IsReadOnly}"
-                            Background="#DC2626" Foreground="White" BorderThickness="0" Padding="8" CornerRadius="4"/>
                   </Grid>
                 </Border>
               </DataTemplate>

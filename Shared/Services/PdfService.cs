@@ -574,7 +574,7 @@ public sealed class PdfService : IPdfService
             TotalTtc = totals.ttc,
             Devise = cfg.Devise,
             AmountInWords = amountWords,
-            Note = note,
+            Note = null,
             ConditionLines = conditionLines ?? Array.Empty<PdfKeyValueLine>(),
             FooterLines = BuildFooterLines(cfg),
             ShowTaxAndTtcInTotalsBox = showTaxAndTtcInTotalsBox
