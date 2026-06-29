@@ -27,7 +27,7 @@ public static class CommercialDocumentPdfRenderer
     private const float HeaderSectionSpacing = 10f;
     private const float HeaderCompanyFontSize = 16f;
     private const float HeaderDocumentKindFontSize = 17f;
-    private const float PartyNameFontSize = 16f;
+    private const float PartyNameFontSize = 12f;
     private const float TableFontSize = 9f;
     private const float TableCellPaddingHorizontal = 2f;
 

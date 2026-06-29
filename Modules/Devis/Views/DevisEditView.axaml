@@ -216,13 +216,15 @@
                              Text="{Binding Valeur, Mode=TwoWay}"
                              Watermark="{Binding $parent[UserControl].((vm:DevisEditViewModel)DataContext).WmConditionValue}"
                              AcceptsReturn="True" MinHeight="44" TextWrapping="Wrap"
+                             VerticalAlignment="Center"
                              IsReadOnly="{Binding $parent[UserControl].((vm:DevisEditViewModel)DataContext).IsReadOnly}"/>
-                    <Button Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
-                            Content="✕" VerticalAlignment="Center"
+                    <Button Grid.Row="1" Grid.Column="1"
+                            Content="✕" VerticalAlignment="Center" HorizontalAlignment="Right"
+                            MinWidth="36" MinHeight="36"
                             Command="{Binding $parent[UserControl].((vm:DevisEditViewModel)DataContext).RemoveConditionCommand}"
                             CommandParameter="{Binding}"
                             IsEnabled="{Binding !$parent[UserControl].((vm:DevisEditViewModel)DataContext).IsReadOnly}"
-                            Background="#DC2626" Foreground="White" BorderThickness="0" Padding="10,6" CornerRadius="4"/>
+                            Background="#DC2626" Foreground="White" BorderThickness="0" Padding="8" CornerRadius="4"/>
                   </Grid>
                 </Border>
               </DataTemplate>
