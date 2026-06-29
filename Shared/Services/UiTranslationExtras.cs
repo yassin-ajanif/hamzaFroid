@@ -264,8 +264,8 @@ internal static class UiTranslationExtras
         ["SupplierLedger_FactureFmt"] = ("FACTURE FOURNISSEUR N°{0}", "فاتورة مورد رقم {0}"),
         ["Avoir_DraftPlaceholder"] = ("(brouillon)", "(مسودة)"),
 
-        ["Login_AppTitle"] = ("Solighting", "Solighting"),
-        ["Login_Subtitle"] = ("Connexion", "تسجيل الدخول"),
+        ["Login_AppTitle"] = ("CRYONEX", "CRYONEX"),
+        ["Login_Subtitle"] = ("INDUSTRIAL & COMMERCIAL REFRIGERATION", "INDUSTRIAL & COMMERCIAL REFRIGERATION"),
         ["Users_FormHint"] = ("Nouvel utilisateur ou modifier la sélection", "مستخدم جديد أو تعديل المحدد"),
 
         ["Settings_WmSociete"] = ("Ex. Ma société SARL", "مثال: شركتي ذ.م.م"),

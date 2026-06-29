@@ -21,8 +21,8 @@ try {
     $IconPath = Join-Path $ProjectRoot "Assets\faturati.ico"
 
     vpk pack `
-        --packId Sonlighting.GestionCommerciale `
-        --packTitle "Solighting" `
+        --packId Cryonex.GestionCommerciale `
+        --packTitle "CRYONEX" `
         --packVersion $Version `
         --packDir $PublishDir `
         --mainExe GestionCommerciale.exe `
